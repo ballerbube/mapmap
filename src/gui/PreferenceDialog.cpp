@@ -510,19 +510,13 @@ void PreferenceDialog::createLanguageList()
 
   _languageBox->addItem("System default", defaultLocale);
 
-  QString translationPath = QApplication::applicationDirPath().append("/translations");
-  QDir dir(translationPath);
-  QStringList translations = dir.entryList(QStringList("mapmap_*.qm"));
-
-  for (int i(0); i < translations.size(); i++) {
-    // get locale extracted by filename
-    QString locale;
-    locale = translations[i]; // mapmap_fr.qm
-    locale.truncate(locale.lastIndexOf('.')); // mapmap_fr
-    locale.remove(0, locale.indexOf('_') + 1); // fr
-
-    QString lang = QLocale::languageToString(QLocale(locale).language());
-
+  // Translations are compiled into Qt resources, not installed as loose files.
+  const QStringList locales = MM::SUPPORTED_LANGUAGES.split(',');
+  for (const QString &entry : locales) {
+    const QString locale = entry.trimmed();
+    if (!QFile::exists(QString(":/translations_mapmap_%1").arg(locale)))
+      continue;
+    const QString lang = QLocale::languageToString(QLocale(locale).language());
     _languageBox->addItem(QString("%1 (%2)").arg(lang).arg(locale), locale);
   }
 }
